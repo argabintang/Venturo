@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venturo Web - POS & Pendataan</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+
+    <!-- HALAMAN LOGIN/REGISTER -->
+    <div id="auth-screen" class="auth-wrapper">
+        <div class="auth-box card">
+            <h2 id="auth-title">Login Venturo</h2>
+            <form id="auth-form">
+                <div class="form-group"><label>Username</label><input type="text" id="auth-username" required></div>
+                <div class="form-group"><label>Password</label><input type="password" id="auth-password" required></div>
+                <button type="submit" class="btn-submit" id="auth-btn">Masuk</button>
+            </form>
+            <p class="auth-switch">Belum punya akun? <span id="toggle-auth">Daftar di sini</span></p>
+        </div>
+    </div>
+
+    <!-- HALAMAN UTAMA -->
+    <div id="app-screen" style="display: none;">
+        <!-- Navbar Atas -->
+        <nav class="navbar">
+            <div class="nav-content">
+                <div class="brand"><i class="fas fa-boxes"></i> <span>VENTURO</span></div>
+                <div class="nav-menu">
+                    <button class="nav-link active" onclick="switchTab('dashboard')"><i class="fas fa-chart-line"></i> Dashboard</button>
+                    <button class="nav-link" onclick="switchTab('input')"><i class="fas fa-plus-circle"></i> Input Data</button>
+                    <button class="nav-link" onclick="switchTab('data')"><i class="fas fa-table"></i> Riwayat Data</button>
+                </div>
+                <div class="nav-actions">
+                    <span id="user-greeting" class="hide-mobile"></span>
+                    <button id="btn-settings" class="btn-icon" title="Pengaturan & Backup"><i class="fas fa-cog"></i></button>
+                    <button id="btn-logout" class="btn-logout" title="Keluar"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container">
+            <!-- TAB 1: DASHBOARD -->
+            <div id="tab-dashboard" class="tab-content active">
+                <div class="dash-header card" style="margin-bottom: 1.5rem;">
+                    <h2>Laporan Bulanan</h2>
+                    <input type="month" id="filter-bulan">
+                </div>
+                <div class="dash-cards">
+                    <div class="dash-card red"><span>Pengeluaran (Masuk)</span><h3 id="dash-pengeluaran">Rp 0</h3></div>
+                    <div class="dash-card green"><span>Pendapatan (Terjual)</span><h3 id="dash-pendapatan">Rp 0</h3></div>
+                    <div class="dash-card blue"><span>Laba / Rugi Bersih</span><h3 id="dash-laba">Rp 0</h3></div>
+                </div>
+            </div>
+
+            <!-- TAB 2: INPUT DATA -->
+            <div id="tab-input" class="tab-content">
+                <div class="card form-panel" style="max-width: 600px; margin: auto;">
+                    <h2>Form Pendataan Transaksi</h2>
+                    <form id="form-transaksi">
+                        <div class="form-group"><label>Tanggal</label><input type="date" id="tanggal" required></div>
+                        <div class="form-group">
+                            <label>Jenis Transaksi</label>
+                            <select id="tipe">
+                                <option value="masuk">Barang Masuk (Restock / Modal)</option>
+                                <option value="terjual">Barang Terjual (Pendapatan)</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Nama Barang</label><input type="text" id="nama_barang" placeholder="Contoh: Kopi Robusta" required></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Jumlah (Qty)</label><input type="number" id="jumlah" min="1" value="1" required></div>
+                            <div class="form-group"><label>Harga Satuan</label><input type="number" id="harga" min="0" placeholder="Rp" required></div>
+                        </div>
+                        <button type="submit" class="btn-submit">Simpan Data</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- TAB 3: RIWAYAT & TABEL -->
+            <div id="tab-data" class="tab-content">
+                <div class="card table-container">
+                    <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2>Semua Data Tersimpan</h2>
+                        <button id="btn-export-csv" class="btn-backup csv" style="width: auto; padding: 0.5rem 1rem; margin:0;"><i class="fas fa-file-csv"></i> Download Excel</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Barang</th>
+                                <th style="text-align: center;">Tipe</th>
+                                <th style="text-align: right;">Total</th>
+                                <th style="text-align: center;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabel-data"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Menu Bawah HP (Mobile Nav) -->
+        <div class="mobile-nav">
+            <button class="nav-link active" onclick="switchTab('dashboard')"><i class="fas fa-chart-line"></i><span>Dash</span></button>
+            <button class="nav-link" onclick="switchTab('input')"><i class="fas fa-plus-circle"></i><span>Input</span></button>
+            <button class="nav-link" onclick="switchTab('data')"><i class="fas fa-table"></i><span>Data</span></button>
+        </div>
+    </div>
+
+    <!-- MODAL EDIT DATA -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content card">
+            <div class="modal-header">
+                <h2>Edit Data Transaksi</h2>
+                <button class="btn-close" onclick="closeEditModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="form-edit">
+                <input type="hidden" id="edit-id">
+                <div class="form-group"><label>Tanggal</label><input type="date" id="edit-tanggal" required></div>
+                <div class="form-group">
+                    <label>Jenis Transaksi</label>
+                    <select id="edit-tipe"><option value="masuk">Barang Masuk</option><option value="terjual">Barang Terjual</option></select>
+                </div>
+                <div class="form-group"><label>Nama Barang</label><input type="text" id="edit-nama_barang" required></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Jumlah</label><input type="number" id="edit-jumlah" required></div>
+                    <div class="form-group"><label>Harga</label><input type="number" id="edit-harga" required></div>
+                </div>
+                <button type="submit" class="btn-submit" style="background-color: #f59e0b;">Update Data</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL PENGATURAN TEMA & BACKUP -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content card">
+            <div class="modal-header">
+                <h2>Pengaturan Akun</h2>
+                <button id="close-settings" class="btn-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="settings-body">
+                <div class="setting-item">
+                    <span>Mode Gelap (Dark Mode)</span>
+                    <label class="switch"><input type="checkbox" id="toggle-dark-mode"><span class="slider round"></span></label>
+                </div>
+                <div class="setting-item">
+                    <span>Warna Utama Tema</span>
+                    <div class="color-picker">
+                        <div class="color-circle" style="background: #1e40af;" data-color="#1e40af"></div>
+                        <div class="color-circle" style="background: #166534;" data-color="#166534"></div>
+                        <div class="color-circle" style="background: #991b1b;" data-color="#991b1b"></div>
+                        <div class="color-circle" style="background: #6b21a8;" data-color="#6b21a8"></div>
+                        <div class="color-circle" style="background: #1f2937;" data-color="#1f2937"></div>
+                    </div>
+                </div>
+                <div class="backup-section">
+                    <h3><i class="fas fa-shield-alt"></i> Full Backup Database</h3>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px;">Download data profil dan seluruh riwayat transaksi agar aman tidak hilang.</p>
+                    <button id="btn-backup-db" class="btn-backup json"><i class="fas fa-database"></i> Download Cadangan Server (JSON)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
